@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: slurm-pod
+spec:
+  containers:
+  - name: slurmctld
+    image: badreddine970/k8s-slurm:latest  # Remplacez par le chemin complet de votre image
+    # Ajoutez d'autres spécifications comme les ressources, les volumes, etc.
+    ressources:
+      requests:
+        memory: "512Mi"
+        cpu: "1"
+      limits:
+        memory: "1Gi"
+        cpu: "2"
+    VolumeMounts:
+    - name: slurmctld-data
+      mounthPath: ""
+
+    volumes:
+    - name: slurmctld-data
+      persistentVolumeClaim:
+        claimName: slurmctld-pvc
