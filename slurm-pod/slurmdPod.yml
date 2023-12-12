@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: slurmd-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: slurmd
+  template:
+    metadata:
+      labels:
+        app: slurmd
+    spec:
+      containers:
+      - name: slurmd
+        image: gromr1/slurmd
+        env:
+        - name: SLURM_CLUSTER_NAME
+          value: "K8s-cluster"
+        - name: SLURM_CONTROL_MACHINE
+          value: "slurmctld"
+        - name: SLURM_NODE_NAMES
+          value: "slurmd"
+        - name: INFLUXDB_HOST
+          value: "influxdb"
+        - name: INFLUXDB_DATABASE_NAME
+          value: "docker_slurm"
+
+        # Add other environment variables specific to slurmd
+      hostname: slurmd
+
