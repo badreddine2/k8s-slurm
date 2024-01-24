@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: slurmctld-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: slurmctld
+  template:
+    metadata:
+      labels:
+        app: slurmctld
+    spec:
+      volumes:
+        - name: slurm-state-volume
+          persistentVolumeClaim:
+            claimName: slurm-state-pvc
+      containers:
+        - name: slurmctld
+          image: badreddine970/slurms
+          env:
+            - name: SLURM_CLUSTER_NAME
+              value: "cluster"
+            - name: SLURM_CONTROL_MACHINE
+              value: "slurmctld"
+            - name: SLURM_NODE_NAMES
+              value: "K8s-cluster"
+            - name: INFLUXDB_HOST
+              value: "influxdb"
+            - name: INFLUXDB_DATABASE_NAME
+              value: "docker_slurm"
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+          volumeMounts:
+            - name: slurm-state-volume
+              mountPath: /tmp
+      hostname: slurmctld
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: slurmctld-service
+spec:
+  selector:
+    app: slurmctld
+  ports:
+    - name: slurmctld-port
+      protocol: TCP
+      # External port for slurmctld
+      port: 6817  # Port for slurmctld inside the pod
+    - name: slurmd-port
+      protocol: TCP
+      # External port for slurmd
+      port: 6818  # Port for slurmd inside the pod
+  type: LoadBalancer
+
